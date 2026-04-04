@@ -34,6 +34,28 @@ It does four things:
 ### `scripts/inspect_collection.py`
 Prints file sizes and a few record previews so you can quickly verify the outputs.
 
+## Prerequisites
+
+- Install compatible dependencies from `requirements.txt` before running the scripts.
+- Hugging Face dataset streaming (`streaming=True`) requires active network access while collecting data.
+
+## How to run
+
+Working directory: `data_collection`
+
+```bash
+cd data_collection
+python scripts/collect_and_merge.py
+python scripts/inspect_collection.py
+```
+
+Alternative from repository root (also supported):
+
+```bash
+python data_collection/scripts/collect_and_merge.py
+python data_collection/scripts/inspect_collection.py
+```
+
 ## Collection-stage filtering
 
 This stage intentionally keeps filtering light because deeper cleaning, deduplication, normalization, tokenization, and chunking belong to later preprocessing steps.

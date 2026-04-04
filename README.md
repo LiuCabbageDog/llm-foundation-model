@@ -24,6 +24,9 @@ The project follows a **hybrid workflow**:
 ```text
 foundation-model-assignment/
 │
+├── data_collection/
+│   └── README.md
+│
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb
 │   ├── 02_tokenizer_debug.ipynb
@@ -45,6 +48,7 @@ foundation-model-assignment/
 │   └── figures/
 │
 ├── requirements.txt
+├── .gitignore
 ├── README.md
 ```
 
