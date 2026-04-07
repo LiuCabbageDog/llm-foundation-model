@@ -1,0 +1,27 @@
+data:
+  raw_corpus_path: data_collection/output/corpus_merged_1300mb.jsonl
+  processed_dataset_path: outputs/sample_dataset.pt
+  tokenizer_output_dir: outputs/tokenizer_hf
+
+tokenizer:
+  hf_tokenizer_name: gpt2
+
+preprocess:
+  min_words: 50
+
+model:
+  embed_dim: 128
+  n_heads: 4
+  n_layers: 2
+  mlp_ratio: 4
+  dropout: 0.1
+
+training:
+  seed: 42
+  batch_size: 32
+  block_size: 64
+  learning_rate: 0.001
+  epochs: 5
+  grad_clip: 1.0
+  log_interval: 20
+  num_workers: 0
