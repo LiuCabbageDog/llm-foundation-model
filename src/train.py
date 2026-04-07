@@ -7,9 +7,9 @@ from pathlib import Path
 import torch
 from torch.optim import AdamW
 
-from dataset import create_dataloader
-from model import MiniGPT
-from utils import load_yaml, save_json, set_seed
+from src.dataset import create_dataloader
+from src.model import MiniGPT
+from src.utils import load_yaml, save_json, set_seed
 
 
 def main() -> None:
