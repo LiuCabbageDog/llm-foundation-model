@@ -98,7 +98,11 @@ def main() -> None:
         all_sequences.extend(chunk_token_ids(encoded_ids, block_size=block_size))
 
     processed_dataset_path.parent.mkdir(parents=True, exist_ok=True)
-    dataset_tensor = torch.tensor(all_sequences, dtype=torch.long)
+    required_sequence_length = block_size + 1
+    if all_sequences:
+        dataset_tensor = torch.tensor(all_sequences, dtype=torch.long)
+    else:
+        dataset_tensor = torch.empty((0, required_sequence_length), dtype=torch.long)
     torch.save(
         {
             "sequences": dataset_tensor,
