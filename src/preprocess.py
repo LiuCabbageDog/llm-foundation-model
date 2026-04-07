@@ -74,18 +74,20 @@ def main() -> None:
             continue
         unique_document_keys.add(dedupe_key)
 
-        # ===== 5.2 Normalize text: lowercase, remove extra whitespace, strip irrelevant symbols. =====
-        normalized_text = normalize_document_text(raw_text)
+        # ===== 5.2 Remove HTML/markdown/reference artifacts while delimiters are still present. =====
+        stripped_text = strip_markup_and_noise(raw_text)
 
-        # ===== 5.3 Remove low-quality or very short documents (e.g., fewer than 50 words). =====
+        # ===== 5.3 Normalize text: lowercase, remove extra whitespace, strip irrelevant symbols. =====
+        normalized_text = normalize_document_text(stripped_text)
+
+        # ===== 5.4 Remove low-quality or very short documents (e.g., fewer than 50 words). =====
         word_count = len(normalized_text.split())
         if word_count < min_words:
             short_document_count += 1
             continue
 
-        # ===== 5.4 Optionally remove HTML tags, markdown, reference markers, and related artifacts. =====
-        cleaned_text = strip_markup_and_noise(normalized_text)
-        cleaned_text = normalize_whitespace(cleaned_text)
+        # ===== 5.5 Final whitespace cleanup before tokenization. =====
+        cleaned_text = normalize_whitespace(normalized_text)
         if not cleaned_text:
             short_document_count += 1
             continue
