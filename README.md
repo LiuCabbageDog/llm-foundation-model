@@ -19,6 +19,72 @@ The project follows a **hybrid workflow**:
 
 ---
 
+## Working Principle
+1. **Data**: Origin Corpus (String)
+2. **Action**: Preprocess
+3. **Data**: Preprocessed Data (String)
+4. **Action**: Tokenization (Tool: Tokenizer)
+  * tokenizer will generate a dictionary
+  * we need to get token_ids from the dic
+5. **Data**: token_ids (Integer List)
+6. **Action**: chunk
+7. **Data**: chuncked token_ids (List of Integer List)
+8. **Action**: Convert data type to Tensor (Tool: PyTorch)
+9. **Data**: .pt file(tensor) [batch * sequence]
+10. **Action**: Use DataLoader to train model by batch
+
+### Model
+1. **Input Data**: batch (tensor) [ sequence ]
+2. **Action**: token embedding + position embedding + embedding dropout(avoid overfitting)
+3. **Data**: embeddings (original embedding) [sequence * dimension] (dimension number in middle layer)
+4. **Action**: Transform (Tool: Transformer)
+  * Target: Recalculate embeddings to embeddings with context info.
+  * Transformer contains multiple layers of TransformerBlock
+  * Transformer Block:
+    * Attention Layer: LayerNorm + SelfAttention + ResidualConnection
+      * Target: Get relationship between tokens.
+      * SelFAttention: 
+        * Linear projection to obtain Q/K/V
+        * Split into multiple heads
+        * Compute ( QK^T ) (relationship score)
+        * Apply causal mask (next-token prodiction)
+        * Apply softmax
+        * Weighted sum of V
+        * Concatenate multiple heads
+        * Output projection
+    * MLP Layer: LayerNorm + MLP + ResidualConnection
+      * Target: Every token process information get by attention layer to increase understanding.
+      * MLP: expand dimensions + nonlinear transformation + project back
+5. **Data**: Hidden States (embedding with context info) [sequence * dimension] (dimension number in middle layer)
+6. **Action**: Final LayerNorm + Linear Head
+7. **Data**: logits (tensor) [sequence * dimension] (dimension number is vocab_size)
+  * Every token getss scores of every token in the vocabulary to predict next token.
+8. **Action**: Use target and logits to calculate cross entropy and refine the model.
+  * Use `optimizer` to refine model.
+
+---
+
+## Tech Stack
+
+* Python 3.x
+* PyTorch (Dataset)
+* Hugging Face Transformers
+* Amazon SageMaker
+* NumPy / Pandas
+* Matplotlib
+
+---
+
+## Tools
+- Code Repo: Github
+- AI: Codex + Copilot
+- Environment: Miniconda
+- IDE
+  - Jupyter Notebook(.ipynb): experimentation & visualization
+  - VS Code(.py): production-ready pipeline
+
+---
+
 ## Project Structure
 
 ```text
@@ -62,7 +128,7 @@ foundation-model-assignment/
 * Analyze text quality and distribution
 * Validate cleaning strategy
 
-### 2. Preprocessing Pipeline (Assignment 1)
+### 2. Preprocessing Pipeline
 
 Implemented in `src/preprocess.py`:
 
@@ -73,33 +139,30 @@ Implemented in `src/preprocess.py`:
 * Chunking long sequences into fixed-length blocks
 * Saving processed dataset
 
-This step satisfies the preprocessing requirements including:
-
-* cleaning, normalization, tokenization, batching 
-
 ---
 
 ### 3. Custom Dataset & DataLoader
 
 Implemented in `src/dataset.py`:
 
-* PyTorch Dataset
-* DataLoader with batching and shuffling
-* Padding / truncation handling
-* Efficient memory usage
+* Use PyTorch Dataset / Dataloader
+* Define what does a Dataset look like
+* Define DataLoader about how to feed model with datasets
+  * DataLoader with batching and shuffling
+  * Efficient memory usage
 
 ---
 
-### 4. Model Implementation (Assignment 2)
+### 4. Model Implementation
 
 Implemented in `src/model.py`:
 
-* Mini-GPT (transformer-based model)
+* Build Mini-GPT (Decoder-style language model)
 * Embedding + positional encoding
-* Multi-head self-attention
-* Layer normalization
-
-Model design follows Assignment 2 requirements 
+* Casual attention mask (next-token prediction)
+* Use **PyTorch** TransformerEncoder
+* Linear Head
+* Calculate cross entropy
 
 ---
 
@@ -107,12 +170,9 @@ Model design follows Assignment 2 requirements
 
 Implemented in `src/train.py`:
 
-* Forward pass
-* Cross-entropy loss
-* Backpropagation
-* Optimizer step
-* Checkpoint saving
-* Logging training metrics
+* Train iteration in nested epoc and dataloader loop
+* Optimizer
+* Save checkpoint + metrics
 
 Tracks:
 
@@ -122,6 +182,20 @@ Tracks:
 ---
 
 ### 6. Visualization (Notebook)
+
+In `03_training_results.ipynb`:
+
+* Loss curves
+* Perplexity curves
+* Hyperparameter comparison
+
+---
+
+### 7. Hyperparameter tuning
+
+In `train_config.yaml`
+
+* Tweak one hyperparameter at a time and record the metric changes.
 
 In `03_training_results.ipynb`:
 
@@ -227,44 +301,19 @@ embed_dim: 128
 
 ---
 
-## Assignment Deliverables
+## Using a Trained Model to Predict the Next Token
 
-### Assignment 1
+During inference, there is no target label to compare against, so the model must generate the next token step by step based on the current context.
 
-* Preprocessing pipeline
-* Sample tokenized dataset (`.pt`)
-* Report (dataset, cleaning, tokenization, challenges) 
-
----
-
-### Assignment 2
-
-* Model implementation
-* Training loop
-* Checkpoints
-* Loss & perplexity visualization
-* Report (architecture, experiments, observations) 
-
----
-
-## Tech Stack
-
-* Python 3.x
-* PyTorch
-* Hugging Face Transformers
-* NumPy / Pandas
-* Matplotlib
-* Amazon SageMaker
-
----
-
-## Tools
-- Code Repo: Github
-- AI: Codex + Copilot
-- Environment: Miniconda
-- IDE
-  - Jupyter Notebook(.ipynb): experimentation & visualization
-  - VS Code(.py): production-ready pipeline
+### Basic process
+1. Feed the current token sequence into the model.
+2. The model outputs logits for every position in the sequence.
+3. Take the logits from the last position, which represent the prediction for the next token.
+4. Choose the next token from that distribution.
+  * You can use argmax to select the highest-scoring token (greedy decoding).
+  * Or you can sample from the probability distribution.
+5. Append the predicted token to the original input sequence.
+6. Repeat the process to generate more tokens until you reach the maximum length or an end token.
 
 ---
 

@@ -67,26 +67,26 @@ def main() -> None:
     for row in iter_jsonl(raw_corpus_path):
         raw_text = str(row.get("text", ""))
 
-        # ===== 5.1 Remove duplicate documents. =====
+        # ===== 1. Remove duplicate documents. =====
         dedupe_key = normalize_whitespace(raw_text).lower()
         if not dedupe_key or dedupe_key in unique_document_keys:
             duplicate_count += 1
             continue
         unique_document_keys.add(dedupe_key)
 
-        # ===== 5.2 Remove HTML/markdown/reference artifacts while delimiters are still present. =====
+        # ===== 2. Remove HTML/markdown/reference artifacts while delimiters are still present. =====
         stripped_text = strip_markup_and_noise(raw_text)
 
-        # ===== 5.3 Normalize text: lowercase, remove extra whitespace, strip irrelevant symbols. =====
+        # ===== 3. Normalize text: lowercase, remove extra whitespace, strip irrelevant symbols. =====
         normalized_text = normalize_document_text(stripped_text)
 
-        # ===== 5.4 Remove low-quality or very short documents (e.g., fewer than 50 words). =====
+        # ===== 4. Remove low-quality or very short documents (e.g., fewer than 50 words). =====
         word_count = len(normalized_text.split())
         if word_count < min_words:
             short_document_count += 1
             continue
 
-        # ===== 5.5 Final whitespace cleanup before tokenization. =====
+        # ===== 5. Final whitespace cleanup before tokenization. =====
         cleaned_text = normalize_whitespace(normalized_text)
         if not cleaned_text:
             short_document_count += 1
@@ -94,11 +94,13 @@ def main() -> None:
 
         cleaned_documents.append(cleaned_text)
 
+    # Tokenization and sequence chunking
     all_sequences: list[list[int]] = []
     for cleaned_text in cleaned_documents:
         encoded_ids = tokenizer.encode(cleaned_text, add_special_tokens=False)
         all_sequences.extend(chunk_token_ids(encoded_ids, block_size=block_size))
 
+    # Save PyTorch data
     processed_dataset_path.parent.mkdir(parents=True, exist_ok=True)
     required_sequence_length = block_size + 1
     if all_sequences:
@@ -116,9 +118,11 @@ def main() -> None:
         processed_dataset_path,
     )
 
+    # Save tokenizer
     tokenizer_output_dir.mkdir(parents=True, exist_ok=True)
     tokenizer.save_pretrained(tokenizer_output_dir)
 
+    # Save summary log
     save_json(
         {
             "input_path": str(raw_corpus_path),
