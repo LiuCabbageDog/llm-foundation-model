@@ -4,7 +4,13 @@ from __future__ import annotations
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+""" Define what does a sequence look like
+Example sequence: [10, 20, 30, 40, 50]
+Input: [10, 20, 30, 40]
+Target: [20, 30, 40, 50]
 
+That is why we need block_size + 1
+"""
 class TokenBlockDataset(Dataset):
     """Dataset of fixed-length token sequences for next-token prediction.
 
@@ -44,8 +50,8 @@ def create_dataloader(
     token_dataset = TokenBlockDataset(sequences)
     return DataLoader(
         token_dataset,
-        batch_size=batch_size,
+        batch_size=batch_size, # The size of data are fed to model
         shuffle=shuffle,
-        num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
+        num_workers=num_workers, # Load data with multiprocess
+        pin_memory=torch.cuda.is_available(), # Use GPU if available
     )
