@@ -15,7 +15,7 @@ All sizes are measured as **UTF-8 bytes written to JSONL**, which makes the size
 - **CNN/DailyMail** → news domain
 - **OpenWebText** → general web-text domain
 
-The Hugging Face dataset cards show that the English Wikipedia dump can be loaded with `load_dataset("wikipedia", "20220301.en")`, CNN/DailyMail is available as `abisee/cnn_dailymail` with version `3.0.0`, and OpenWebText is available as `Skylion007/openwebtext`. Dataset streaming in Hugging Face is enabled by passing `streaming=True` to `load_dataset`, which avoids downloading the full dataset up front. 
+The Hugging Face dataset cards show that English Wikipedia can be streamed from `wikimedia/wikipedia` (preferred for modern `datasets` versions), while older environments may still expose `wikipedia` + `20220301.en`. CNN/DailyMail is available as `abisee/cnn_dailymail` with version `3.0.0`, and OpenWebText is available as `Skylion007/openwebtext`. Dataset streaming in Hugging Face is enabled by passing `streaming=True` to `load_dataset`, which avoids downloading the full dataset up front. 
 
 ## What each file does
 
