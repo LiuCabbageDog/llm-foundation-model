@@ -9,6 +9,9 @@ This folder contains a data-collection pipeline for the **data collection phase*
 
 All sizes are measured as **UTF-8 bytes written to JSONL**, which makes the size accounting easy to explain in the report.
 
+Place or generate your merged JSONL corpus at the path configured in `configs/train_config.yaml`:
+* default: `data_collection/output/corpus_merged_1300mb.jsonl`
+
 ## Chosen sources
 
 - **Wikipedia** → encyclopedic domain
@@ -33,11 +36,6 @@ It does four things:
 
 ### `scripts/inspect_collection.py`
 Prints file sizes and a few record previews so you can quickly verify the outputs.
-
-## Prerequisites
-
-- Install compatible dependencies from `requirements.txt` before running the scripts.
-- Hugging Face dataset streaming (`streaming=True`) requires active network access while collecting data.
 
 ## How to run
 
