@@ -15,7 +15,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Optional
+from typing import Dict, Iterable, Optional
 
 from datasets import load_dataset
 from tqdm import tqdm
@@ -91,6 +91,41 @@ def iter_streaming_dataset(dataset_name: str, config_name: Optional[str], split:
     return load_dataset(**kwargs)
 
 
+def load_streaming_with_fallbacks(spec: Dict):
+    """Load a streaming dataset, trying script-free fallbacks first."""
+    candidates = spec.get(
+        "dataset_candidates",
+        [{"dataset_name": spec["dataset_name"], "config_name": spec["config_name"]}],
+    )
+    last_error: Optional[Exception] = None
+
+    for candidate in candidates:
+        dataset_name = candidate["dataset_name"]
+        config_name = candidate.get("config_name")
+        try:
+            return iter_streaming_dataset(
+                dataset_name=dataset_name,
+                config_name=config_name,
+                split=spec["split"],
+            )
+        except Exception as err:  # noqa: BLE001
+            if "Dataset scripts are no longer supported" in str(err):
+                print(
+                    f"[warn] Dataset '{dataset_name}' rejected by installed "
+                    "datasets version (dataset script unsupported). Trying next fallback..."
+                )
+                last_error = err
+                continue
+            raise
+
+    assert last_error is not None
+    raise RuntimeError(
+        "Failed to load dataset using all candidates. "
+        "If this is a network/proxy issue, verify Hugging Face access. "
+        f"Last error: {last_error}"
+    ) from last_error
+
+
 def collect_source(source_key: str) -> SourceStats:
     spec = DATASET_SPECS[source_key]
     target_mb = TARGETS_MB[source_key]
@@ -101,11 +136,7 @@ def collect_source(source_key: str) -> SourceStats:
         output_file=str(spec["output_file"]),
     )
 
-    ds = iter_streaming_dataset(
-        dataset_name=spec["dataset_name"],
-        config_name=spec["config_name"],
-        split=spec["split"],
-    )
+    ds = load_streaming_with_fallbacks(spec)
 
     progress = tqdm(
         total=target_bytes,

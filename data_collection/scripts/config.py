@@ -21,8 +21,14 @@ TARGETS_MB = {
 
 DATASET_SPECS = {
     "wikipedia": {
-        "dataset_name": "wikipedia",
-        "config_name": "20220301.en",
+        # Prefer script-free parquet exports first (datasets>=3 removed
+        # loading dataset scripts such as wikipedia.py).
+        "dataset_candidates": [
+            {"dataset_name": "wikimedia/wikipedia", "config_name": "20231101.en"},
+            {"dataset_name": "wikipedia", "config_name": "20220301.en"},
+        ],
+        "dataset_name": "wikimedia/wikipedia",
+        "config_name": "20231101.en",
         "split": "train",
         "source_label": "encyclopedic",
         "output_file": OUTPUT_DIR / "wikipedia_520mb.jsonl",
