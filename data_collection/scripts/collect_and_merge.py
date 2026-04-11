@@ -108,9 +108,8 @@ def load_streaming_with_fallbacks(spec: Dict):
                 config_name=config_name,
                 split=spec["split"],
             )
-        except RuntimeError as err:
-            message = str(err)
-            if "Dataset scripts are no longer supported" in message:
+        except Exception as err:  # noqa: BLE001
+            if "Dataset scripts are no longer supported" in str(err):
                 print(
                     f"[warn] Dataset '{dataset_name}' rejected by installed "
                     "datasets version (dataset script unsupported). Trying next fallback..."
@@ -118,9 +117,6 @@ def load_streaming_with_fallbacks(spec: Dict):
                 last_error = err
                 continue
             raise
-        except Exception as err:  # noqa: BLE001
-            last_error = err
-            continue
 
     assert last_error is not None
     raise RuntimeError(
