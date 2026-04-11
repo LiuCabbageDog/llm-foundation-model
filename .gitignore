@@ -10,3 +10,18 @@ __pycache__/
 # Virtual env
 venv/
 .env/
+
+# large files
+*.pt
+*.jsonl
+
+# data
+outputs/
+data/
+
+# logs
+logs/
+*.log
+
+# Jupyter checkpoints
+.ipynb_checkpoints/

@@ -88,47 +88,62 @@ The project follows a **hybrid workflow**:
 ## Project Structure
 
 ```text
-foundation-model-assignment/
-│
-├── data_collection/
-│   └── README.md
-│
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_tokenizer_debug.ipynb
-│   └── 03_training_results.ipynb
-│
-├── src/
-│   ├── preprocess.py
-│   ├── dataset.py
-│   ├── model.py
-│   ├── train.py
-│   └── utils.py
-│
+llm-foundation-model/
+├── README.md
 ├── configs/
 │   └── train_config.yaml
-│
-├── outputs/
-│   ├── sample_dataset.pt
+├── data_collection/
+│   ├── README.md
 │   ├── logs/
-│   └── figures/
-│
+│   │   └── collection_summary.json
+│   ├── output/
+│   │   ├── corpus_merged_1300mb.jsonl
+│   │   ├── news_390mb.jsonl
+│   │   ├── web_390mb.jsonl
+│   │   └── wikipedia_520mb.jsonl
+│   └── scripts/
+│       ├── collect_and_merge.py
+│       ├── config.py
+│       └── inspect_collection.py
+├── experiment/
+│   ├── raw_data_exploration.py
+│   ├── sample_dataset_exploration.ipynb
+│   ├── tokenizer_debug.py
+│   └── training_results_visualization.py
+├── outputs/
+│   ├── logs/
+│   │   └── preprocess_summary.json
+│   ├── sample_dataset.pt
+│   ├── sample_dataset_small.pt
+│   └── tokenizer_hf/
+│       ├── tokenizer.json
+│       └── tokenizer_config.json
 ├── requirements.txt
-├── .gitignore
-├── README.md
+└── src/
+    ├── dataset.py
+    ├── model.py
+    ├── preprocess.py
+    ├── train.py
+    └── utils.py
 ```
 
 ---
 
 ## Workflow
 
-### 1. Data Exploration (Notebook)
+### 1. Data Exploration
+
+Implemented in `experiment/raw_data_exploration.py`:
 
 * Inspect raw dataset
 * Analyze text quality and distribution
 * Validate cleaning strategy
 
-### 2. Preprocessing Pipeline
+### 2. Explore Tokenizer
+
+Implemented in `experiment/tokenizer_debug.py`:
+
+### 3. Preprocessing Pipeline
 
 Implemented in `src/preprocess.py`:
 
@@ -141,7 +156,16 @@ Implemented in `src/preprocess.py`:
 
 ---
 
-### 3. Custom Dataset & DataLoader
+### 4. Explore Sample Dataset
+
+Implemented in `experiment/sample_dataset_exploration`:
+
+* Inspect preprocessed sample dataset
+* Extract first five sample data into `sample_dataset_small.pt`
+
+---
+
+### 5. Custom Dataset & DataLoader
 
 Implemented in `src/dataset.py`:
 
@@ -153,7 +177,7 @@ Implemented in `src/dataset.py`:
 
 ---
 
-### 4. Model Implementation
+### 6. Model Implementation
 
 Implemented in `src/model.py`:
 
@@ -166,7 +190,7 @@ Implemented in `src/model.py`:
 
 ---
 
-### 5. Training Pipeline
+### 7. Training Pipeline
 
 Implemented in `src/train.py`:
 
@@ -181,9 +205,9 @@ Tracks:
 
 ---
 
-### 6. Visualization (Notebook)
+### 8. Visualization
 
-In `03_training_results.ipynb`:
+Implemented in `experiment/training_results_visualization`:
 
 * Loss curves
 * Perplexity curves
@@ -191,17 +215,11 @@ In `03_training_results.ipynb`:
 
 ---
 
-### 7. Hyperparameter tuning
+### 9. Hyperparameter tuning
 
 In `train_config.yaml`
 
 * Tweak one hyperparameter at a time and record the metric changes.
-
-In `03_training_results.ipynb`:
-
-* Loss curves
-* Perplexity curves
-* Hyperparameter comparison
 
 ---
 
@@ -225,17 +243,22 @@ Output:
 
 ---
 
-### Step 2: Train Model (Local)
+### Step 2A: Train Locally
 
 ```bash
-python src/train.py
+python -m src.train
 ```
+
+Training writes:
+
+* `outputs/mini_gpt.pt`
+* `outputs/logs/train_metrics.json`
 
 ---
 
-### Step 3: Train on SageMaker (Optional but Recommended)
+### Step 2B: Train on SageMaker
 
-You can submit training jobs from local environment:
+Keep using the same project code, but package your local `src/` as `source_dir` and run `train.py` as the SageMaker entrypoint.
 
 ```python
 from sagemaker.pytorch import PyTorch
@@ -252,6 +275,8 @@ estimator.fit({
     "training": "s3://your-bucket/data/"
 })
 ```
+
+> If you launch SageMaker training from this repo, make sure your training data path and IAM role match your AWS account setup.
 
 ---
 
