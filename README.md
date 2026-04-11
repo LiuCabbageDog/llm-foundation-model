@@ -109,7 +109,7 @@ llm-foundation-model/
 │   ├── raw_data_exploration.py
 │   ├── sample_dataset_exploration.ipynb
 │   ├── tokenizer_debug.py
-│   └── training_results.py
+│   └── training_results_visualization.py
 ├── outputs/
 │   ├── logs/
 │   │   └── preprocess_summary.json
@@ -215,17 +215,11 @@ Implemented in `experiment/training_results_visualization`:
 
 ---
 
-### 7. Hyperparameter tuning
+### 9. Hyperparameter tuning
 
 In `train_config.yaml`
 
 * Tweak one hyperparameter at a time and record the metric changes.
-
-In `03_training_results.ipynb`:
-
-* Loss curves
-* Perplexity curves
-* Hyperparameter comparison
 
 ---
 
