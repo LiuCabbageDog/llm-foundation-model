@@ -1,2 +1,12 @@
 # ignore mac system files
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.env/

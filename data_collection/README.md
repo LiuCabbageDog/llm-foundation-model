@@ -41,6 +41,23 @@ Prints file sizes and a few record previews so you can quickly verify the output
 
 ## How to run
 
+### Install Dependencies
+
+Use conda to install `pytorch` seperately.
+* Install pytorch, torchvision(image process), torchaudio(audio process) at the same time and keep version consistent and compatible.
+
+```bash
+conda install pytorch torchvision torchaudio -c pytorch
+```
+
+Use `requirements.txt` to install all other dependencies.
+
+```bash
+pip install -r requirements.txt
+```
+
+### Start to collect data
+
 Working directory: `data_collection`
 
 ```bash

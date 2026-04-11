@@ -207,11 +207,9 @@ In `03_training_results.ipynb`:
 
 ## Running the Project
 
-### Install Dependencies
+### Before start
 
-```bash
-pip install -r requirements.txt
-```
+Follow the instruction in `data_collection/README.md` to collect data.
 
 ---
 
